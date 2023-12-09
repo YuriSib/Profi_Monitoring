@@ -40,14 +40,25 @@ try:
     username_input.send_keys("+79381736854")
     button = driver.find_element("xpath", '''//*[@id="content"]/div/div[2]/div/div[2]/div/div/form/a''')
     button.click()
+    time.sleep(3)
 
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located(("xpath", '''//*[@id="rc-imageselect-target"]/
-    table/tbody/tr[2]/td[2]/div/div[1]/img''')))
+    driver.switch_to.frame(driver.find_elements("tag name", "iframe")[3])
+
     html = driver.page_source
     soup = BeautifulSoup(html, "lxml")
-    pic = soup.find('div', class_="rc-image-tile-target")#.find('img')["src"]
+
+    pic = soup.find('div', class_="rc-image-tile-target").find('img')["src"]
     photo_saver(pic)
-    time.sleep(5)
+
+    try:
+        result = solver.grid('captcha.jpg')
+
+    except Exception as e:
+        sys.exit(e)
+
+    else:
+        sys.exit('solved: ' + str(result))
+
 
 except Exception as ex:
     print(ex)
