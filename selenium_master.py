@@ -1,9 +1,10 @@
 import time
-from twocaptcha import TwoCaptcha
+import requests
 import sys
 import os
 from bs4 import BeautifulSoup
 import urllib.request
+from twocaptcha import TwoCaptcha
 
 from selenium import webdriver
 from selenium_stealth import stealth
@@ -28,40 +29,84 @@ def photo_saver(url_):
             print("Ошибка при скачивании фото:")
 
 
-solver = TwoCaptcha('791a1c2ea34bdead3918fffa46003ad6')
+def log_in():
+    s = Service(executable_path='C:\chromedriver\chromedriver.exe')
+    driver = webdriver.Chrome(service=s)
 
-s = Service(executable_path='C:\chromedriver\chromedriver.exe')
-driver = webdriver.Chrome(service=s)
-
-try:
+    # try:
     driver.maximize_window()
     driver.get('https://profi.ru/backoffice/n.php')
-    username_input = driver.find_element("xpath", '''//*[@id="content"]/div/div[2]/div/div[2]/div/div/form/div/div/div[1]/label/span/input''')
+    username_input = driver.find_element("xpath", '''//*[@id="content"]/div/div[2]/div/div[2]/div/div/form/div/div
+                                                                                        /div[1]/label/span/input''')
     username_input.send_keys("+79381736854")
     button = driver.find_element("xpath", '''//*[@id="content"]/div/div[2]/div/div[2]/div/div/form/a''')
     button.click()
-    time.sleep(3)
+    time.sleep(8)
 
-    driver.switch_to.frame(driver.find_elements("tag name", "iframe")[3])
+    # element_for_delete = driver.find_element("css selector", "body > div:nth-child(17)")
+    # driver.execute_script("arguments[0].remove()", element_for_delete)
+    #
+    # element_to_replace = driver.find_element("css selector", "#g-recaptcha-response")
+    # driver.execute_script(f"var oldElement = document.querySelector('#g-recaptcha-response'); var newElement = document.createElement('input'); newElement.setAttribute('type', 'submit'); document.body.appendChild(newElement);")
 
-    html = driver.page_source
-    soup = BeautifulSoup(html, "lxml")
+    elem_hidden = driver.find_element("css selector", 'textarea.g-recaptcha-response')
+    driver.execute_script("arguments[0].style.display = 'block';", elem_hidden)
 
-    pic = soup.find('div', class_="rc-image-tile-target").find('img')["src"]
-    photo_saver(pic)
+    # response = requests.post("http://rucaptcha.com/in.php?key=791a1c2ea34bdead3918fffa46003ad6&method=userrecaptcha&"
+    # "googlekey=6LfblGwnAAAAAIcKbojt23iwNJk3Tnh5Mk1Xq3m0&pageurl=https://profi.ru/backoffice/n.php").text.replace('OK|', '')
+    # time.sleep(25)
+    # token = requests.get(f"http://rucaptcha.com/res.php?key=791a1c2ea34bdead3918fffa46003ad6&action=get&id={response}").text.replace('OK|', '')
+    # while token == 'CAPCHA_NOT_READY':
+    #     time.sleep(5)
+    #     token = requests.get(
+    #         f"http://rucaptcha.com/res.php?key=791a1c2ea34bdead3918fffa46003ad6&action=get&id={response}").text.replace(
+    #         'OK|', '')
+    # # token = 'token'
 
-    try:
-        result = solver.grid('captcha.jpg')
+    # element = driver.find_element("css selector", 'textarea.g-recaptcha-response')
+    # driver.execute_script(f'''arguments[0].setAttribute('id', '{token}')''', element)
 
-    except Exception as e:
-        sys.exit(e)
+    # driver.execute_script(f'''document.getElementById("g-recaptcha-response").innerHTML="{token}"''')
 
-    else:
-        sys.exit('solved: ' + str(result))
+    # form = driver.find_element("css selector", '''#content > div > div.WrapperStyles__ContentWrapper-sc-fpifz8-2.gWGsZR > div > div.auth-container > div > div > form''')
+    # form.find_element("class name", 'login-form').send_keys('1342342')
+    driver.execute_script('''document.getElementsByClassName("login-form").submit();''')
+    print(token)
+    time.sleep(20)
 
 
-except Exception as ex:
-    print(ex)
-finally:
-    driver.close()
-    driver.quit()
+    # frame_list = driver.find_elements("tag name", "iframe")
+    #
+    # pic = None
+    # cnt = 0
+    # for frame in frame_list:
+    #     cnt += 1
+    #     driver.switch_to.default_content()
+    #     driver.switch_to.frame(frame)
+    #     html = driver.page_source
+    #     soup = BeautifulSoup(html, "lxml")
+    #     html_pic = soup.find('div', class_="rc-imageselect-challenge")
+    #     if html_pic:
+    #         pic = html_pic.find('img')["src"]
+    #         break
+    #
+    # driver.switch_to.default_content()
+    # html = driver.page_source
+    # soup = BeautifulSoup(html, "lxml")
+    # captcha_token = (soup.find_all('iframe')[cnt])["src"]
+    # document.getElementById("recaptcha-demo-form").submit()
+    #
+    # if pic:
+    #     photo_saver(pic)
+    # token_captcha = html.find_element()
+
+
+    # except Exception as ex:
+    #     print(ex)
+    # finally:
+    #     driver.close()
+    #     driver.quit()
+
+
+if __name__ == "__main__":
+    log_in()
